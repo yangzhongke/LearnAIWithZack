@@ -7,20 +7,21 @@ var collectionName = "my_documents";
 var files = Directory.GetFiles("E:\\主同步盘\\我的坚果云\\读书笔记及我的文章\\历史记录\\2010年之前的笔记\\blog随笔", "*.txt",
     SearchOption.AllDirectories);
 
-var apiKey = Environment.GetEnvironmentVariable("AI__EmbeddingApiKey");
+var embeddingApiKey = Environment.GetEnvironmentVariable("AI__EmbeddingApiKey");
+var chatApiKey = Environment.GetEnvironmentVariable("AI__ChatApiKey");
+
+
+var embeddingEndpoint = "https://personalopenai1.openai.azure.com/openai/v1/";
+var embeddingDeploymentName = "text-embedding-3-large";
+var textGenEndpoint = "https://yangz-mf8s64eg-eastus2.cognitiveservices.azure.com/openai/v1/";
+var extGenDeploymentName = "gpt-5-nano";
 
 /*
-string embeddingEndpoint = "https://personalopenai1.openai.azure.com/openai/v1/";
-string embeddingDeploymentName = "text-embedding-3-large";
-string textGenEndpoint = "https://yangz-mf8s64eg-eastus2.cognitiveservices.azure.com/openai/v1/";
-var extGenDeploymentName = "gpt-5-nano";
-*/
-
 //Ollama 兼容OpenAI API
 var embeddingEndpoint = "http://127.0.0.1:11434/v1/";
 var embeddingDeploymentName = "mxbai-embed-large:latest";
 var textGenEndpoint = "http://127.0.0.1:11434/v1/";
-var extGenDeploymentName = "llama3:latest";
+var extGenDeploymentName = "llama3:latest";*/
 
 using var httpClientOllama = new HttpClient
     { Timeout = TimeSpan.FromMinutes(50), BaseAddress = new Uri("http://127.0.0.1:11434") };
@@ -28,8 +29,8 @@ using var httpClientQdrant = new HttpClient
     { Timeout = TimeSpan.FromMinutes(50), BaseAddress = new Uri("http://localhost:6333") };
 var qdrantClient = new QdrantClient(httpClientQdrant);
 
-var embeddingClient = new EmbeddingClient(embeddingEndpoint, embeddingDeploymentName, apiKey);
-var completeChatClient = new CompleteChatClient(textGenEndpoint, extGenDeploymentName, apiKey);
+var embeddingClient = new EmbeddingClient(embeddingEndpoint, embeddingDeploymentName, embeddingApiKey);
+var completeChatClient = new CompleteChatClient(textGenEndpoint, extGenDeploymentName, chatApiKey);
 
 Console.WriteLine("请选择操作：1-保存到Qdrant，2-RAG检索+AI生成");
 var choice = Console.ReadLine();
@@ -78,6 +79,7 @@ else if (choice == "2")
         var streamingText = completeChatClient.GenerateStreamingTextAsync(question, context);
         // 实时打印流式输出
         await foreach (var text in streamingText) Console.Write(text);
+        Console.WriteLine();
         Console.WriteLine("===============================================");
     }
 }
