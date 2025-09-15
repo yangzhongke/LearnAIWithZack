@@ -1,0 +1,29 @@
+﻿version: '3.8'
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    entrypoint: >
+      sh -c "
+        ollama serve &
+        sleep 5 &&
+        ollama pull mxbai-embed-large:latest &&
+        ollama pull llama3:latest &&
+        wait
+      "
+
+volumes:
+  qdrant_data:
+  ollama_data:
