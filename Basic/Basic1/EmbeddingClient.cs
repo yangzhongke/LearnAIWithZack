@@ -5,7 +5,7 @@ namespace AI_2;
 
 public class EmbeddingClient(string endpoint, string deploymentName, string apiKey = null)
 {
-    public async Task<float[]> GetEmbeddingAsync(string input)
+    public async Task<float[]> GetEmbeddingAsync(string input, CancellationToken cancellationToken=default)
     {
         OpenAIClient client = new(
             new ApiKeyCredential(apiKey),
@@ -14,7 +14,7 @@ public class EmbeddingClient(string endpoint, string deploymentName, string apiK
                 Endpoint = new Uri(endpoint)
             });
 
-        var embeddingResult  = await client.GetEmbeddingClient(deploymentName).GenerateEmbeddingAsync(input);
+        var embeddingResult  = await client.GetEmbeddingClient(deploymentName).GenerateEmbeddingAsync(input, cancellationToken: cancellationToken);
 
         if (embeddingResult.Value!=null)
         {
