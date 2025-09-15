@@ -14,11 +14,12 @@ string embeddingDeploymentName = "text-embedding-3-large";
 string textGenEndpoint = "https://yangz-mf8s64eg-eastus2.cognitiveservices.azure.com/openai/v1/";
 var extGenDeploymentName = "gpt-5-nano";
 */
-string embeddingEndpoint = "http://127.0.0.1:11434/v1/";//"https://personalopenai1.openai.azure.com/openai/v1/";
-string embeddingDeploymentName = "mxbai-embed-large:latest";//""text-embedding-3-large";
 
-string textGenEndpoint = "http://127.0.0.1:11434/v1/";//"https://yangz-mf8s64eg-eastus2.cognitiveservices.azure.com/openai/v1/";
-var extGenDeploymentName = "llama3:latest";//"gpt-5-nano";
+//Ollama 兼容OpenAI API
+string embeddingEndpoint = "http://127.0.0.1:11434/v1/";
+string embeddingDeploymentName = "mxbai-embed-large:latest";
+string textGenEndpoint = "http://127.0.0.1:11434/v1/";
+var extGenDeploymentName = "llama3:latest";
 
 using var httpClientOllama = new HttpClient
     { Timeout = TimeSpan.FromMinutes(50), BaseAddress = new Uri("http://127.0.0.1:11434") };
