@@ -38,7 +38,7 @@ public class CompleteChatClient(string endpoint, string deploymentName, string a
     public async IAsyncEnumerable<string> GenerateStreamingTextAsync(string input, string context,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        using var transport = new LoggingHttpClientPipelineTransport();
+        using var transport = new HttpLoggingPipelineTransport();
 
         ChatClient client = new(
             credential: new ApiKeyCredential(apiKey),
@@ -58,6 +58,8 @@ public class CompleteChatClient(string endpoint, string deploymentName, string a
 
         await foreach (var update in asyncCollectionResult)
         foreach (var contentPart in update.ContentUpdate)
+        {
             yield return contentPart.Text ?? string.Empty;
+        }
     }
 }

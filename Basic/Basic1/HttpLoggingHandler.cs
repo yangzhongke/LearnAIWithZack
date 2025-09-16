@@ -1,5 +1,3 @@
-using System.Text;
-
 namespace AI_2;
 
 public class HttpLoggingHandler : DelegatingHandler
@@ -9,6 +7,19 @@ public class HttpLoggingHandler : DelegatingHandler
     public HttpLoggingHandler()
     {
         _logAction = Console.WriteLine;
+    }
+
+    public HttpLoggingHandler(string logFilePath)
+    {
+        if (string.IsNullOrWhiteSpace(logFilePath))
+        {
+            throw new ArgumentException("Log file path cannot be null or empty.", nameof(logFilePath));
+        }
+
+        _logAction = message =>
+        {
+            File.AppendAllText(logFilePath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}{Environment.NewLine}");
+        };
     }
 
     public HttpLoggingHandler(Action<string> logAction)
@@ -23,9 +34,7 @@ public class HttpLoggingHandler : DelegatingHandler
         {
             var requestMediaType = request.Content.Headers.ContentType?.MediaType;
             var requestCharset = request.Content.Headers.ContentType?.CharSet;
-            var requestEncoding = !string.IsNullOrEmpty(requestCharset)
-                ? Encoding.GetEncoding(requestCharset)
-                : Encoding.UTF8;
+            var requestEncoding = EncodingHelper.GetEncodingFromContentType(requestCharset);
 
             if (requestMediaType != null &&
                 (requestMediaType.StartsWith("text/") || requestMediaType == "application/json"))
@@ -50,7 +59,7 @@ public class HttpLoggingHandler : DelegatingHandler
         var respContentType = response.Content.Headers.ContentType;
         var respMediaType = respContentType?.MediaType;
         var respCharset = respContentType?.CharSet;
-        var respEncoding = !string.IsNullOrEmpty(respCharset) ? Encoding.GetEncoding(respCharset) : Encoding.UTF8;
+        var respEncoding = EncodingHelper.GetEncodingFromContentType(respCharset);
 
         if (respMediaType != null && (respMediaType.StartsWith("text/") || respMediaType == "application/json"))
         {

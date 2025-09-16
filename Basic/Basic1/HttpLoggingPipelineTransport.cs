@@ -2,17 +2,17 @@ using System.ClientModel.Primitives;
 
 namespace AI_2;
 
-public class LoggingHttpClientPipelineTransport : HttpClientPipelineTransport, IDisposable
+public class HttpLoggingPipelineTransport : HttpClientPipelineTransport, IDisposable
 {
     private readonly HttpClient _httpClient;
     private readonly HttpLoggingHandler _loggingHandler;
     private bool _disposed;
 
-    public LoggingHttpClientPipelineTransport() : this(null)
+    public HttpLoggingPipelineTransport() : this(null)
     {
     }
 
-    public LoggingHttpClientPipelineTransport(Action<string>? logAction = null) : base(
+    public HttpLoggingPipelineTransport(Action<string>? logAction = null) : base(
         CreateHttpClientWithLogging(logAction, out var httpClient, out var loggingHandler))
     {
         _httpClient = httpClient;
