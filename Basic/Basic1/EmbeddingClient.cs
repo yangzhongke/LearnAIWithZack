@@ -1,5 +1,4 @@
 using System.ClientModel;
-using System.ClientModel.Primitives;
 using OpenAI;
 
 namespace AI_2;
@@ -8,8 +7,7 @@ public class EmbeddingClient(string endpoint, string deploymentName, string apiK
 {
     public async Task<float[]> GetEmbeddingAsync(string input, CancellationToken cancellationToken = default)
     {
-        var httpClient = new HttpClient(new HttpLoggingHandler { InnerHandler = new HttpClientHandler() });
-        var transport = new HttpClientPipelineTransport(httpClient);
+        using var transport = new LoggingHttpClientPipelineTransport();
         OpenAIClient client = new(
             new ApiKeyCredential(apiKey),
             new OpenAIClientOptions

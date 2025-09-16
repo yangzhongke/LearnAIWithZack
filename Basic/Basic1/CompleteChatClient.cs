@@ -1,5 +1,4 @@
 using System.ClientModel;
-using System.ClientModel.Primitives;
 using System.Runtime.CompilerServices;
 using System.Text;
 using OpenAI;
@@ -39,8 +38,7 @@ public class CompleteChatClient(string endpoint, string deploymentName, string a
     public async IAsyncEnumerable<string> GenerateStreamingTextAsync(string input, string context,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var httpClient = new HttpClient(new HttpLoggingHandler { InnerHandler = new HttpClientHandler() });
-        var transport = new HttpClientPipelineTransport(httpClient);
+        using var transport = new LoggingHttpClientPipelineTransport();
 
         ChatClient client = new(
             credential: new ApiKeyCredential(apiKey),
@@ -48,7 +46,7 @@ public class CompleteChatClient(string endpoint, string deploymentName, string a
             options: new OpenAIClientOptions
             {
                 Endpoint = new Uri($"{endpoint}"),
-                Transport = transport,
+                Transport = transport
             });
 
         var asyncCollectionResult = client.CompleteChatStreamingAsync(
