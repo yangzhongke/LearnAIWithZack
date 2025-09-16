@@ -76,6 +76,7 @@ else if (choice == "2")
         /*
         var answer = await completeChatClient.GenerateTextAsync(question, context);
         Console.WriteLine($"AI回答：{answer}");*/
+        Console.WriteLine("AI回答：");
         var streamingText = completeChatClient.GenerateStreamingTextAsync(question, context);
         // 实时打印流式输出
         await foreach (var text in streamingText) Console.Write(text);
