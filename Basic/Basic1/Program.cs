@@ -1,5 +1,8 @@
 ﻿using System.Text;
 using AI_2;
+using HttpMataki.NET.Auto;
+
+HttpClientAutoInterceptor.StartInterception();
 
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
@@ -45,11 +48,19 @@ if (choice == "1")
         foreach (var chunk in chunks)
         {
             string substring;
-            if (chunk.Length < 20) continue; // 太短的跳过
+            if (chunk.Length < 20)
+            {
+                continue; // 太短的跳过
+            }
+
             if (chunk.Length > 1000)
+            {
                 substring = chunk.Substring(0, 1000); // 太长的截断
+            }
             else
+            {
                 substring = chunk;
+            }
 
             // 2. 使用Ollama做embedding
             var embedding = await embeddingClient.GetEmbeddingAsync(substring);
@@ -71,7 +82,11 @@ else if (choice == "2")
         var question = Console.ReadLine();
         var questionEmbedding = await embeddingClient.GetEmbeddingAsync(question);
         var relevantDocs = await qdrantClient.SearchQdrantAsync(collectionName, questionEmbedding);
-        for (var i = 0; i < relevantDocs.Count; i++) Console.WriteLine($"相关内容片段{i}：{relevantDocs[i]}");
+        for (var i = 0; i < relevantDocs.Count; i++)
+        {
+            Console.WriteLine($"相关内容片段{i}：{relevantDocs[i]}");
+        }
+
         var context = string.Join("\n", relevantDocs);
         /*
         var answer = await completeChatClient.GenerateTextAsync(question, context);
@@ -79,7 +94,11 @@ else if (choice == "2")
         Console.WriteLine("AI回答：");
         var streamingText = completeChatClient.GenerateStreamingTextAsync(question, context);
         // 实时打印流式输出
-        await foreach (var text in streamingText) Console.Write(text);
+        await foreach (var text in streamingText)
+        {
+            Console.Write(text);
+        }
+
         Console.WriteLine();
         Console.WriteLine("===============================================");
     }

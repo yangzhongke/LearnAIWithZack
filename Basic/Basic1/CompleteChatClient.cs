@@ -38,15 +38,12 @@ public class CompleteChatClient(string endpoint, string deploymentName, string a
     public async IAsyncEnumerable<string> GenerateStreamingTextAsync(string input, string context,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        using var transport = new HttpLoggingPipelineTransport();
-
         ChatClient client = new(
             credential: new ApiKeyCredential(apiKey),
             model: deploymentName,
             options: new OpenAIClientOptions
             {
-                Endpoint = new Uri($"{endpoint}"),
-                Transport = transport
+                Endpoint = new Uri($"{endpoint}")
             });
 
         var asyncCollectionResult = client.CompleteChatStreamingAsync(

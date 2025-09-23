@@ -7,13 +7,11 @@ public class EmbeddingClient(string endpoint, string deploymentName, string apiK
 {
     public async Task<float[]> GetEmbeddingAsync(string input, CancellationToken cancellationToken = default)
     {
-        using var transport = new HttpLoggingPipelineTransport();
         OpenAIClient client = new(
             new ApiKeyCredential(apiKey),
             new OpenAIClientOptions
             {
-                Endpoint = new Uri(endpoint),
-                Transport = transport
+                Endpoint = new Uri(endpoint)
             });
 
         var embeddingResult = await client.GetEmbeddingClient(deploymentName)
