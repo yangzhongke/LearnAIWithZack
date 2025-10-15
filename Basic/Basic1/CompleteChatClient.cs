@@ -21,7 +21,7 @@ public class CompleteChatClient(string endpoint, string deploymentName, string a
 
         ChatCompletion completion = await client.CompleteChatAsync(
         [
-            new SystemChatMessage("请根据以下内容使用简体中文回答用户的问题：\n{context}。注意不要基于除了提供的内容之外进行回答。"),
+            new SystemChatMessage($"根据提供的内容使用简体中文回答用户的问题。注意：不要在提供的内容之外进行回答。内容如下：\n{context}。"),
             new UserChatMessage(input)
         ], cancellationToken: cancellationToken);
 
@@ -48,7 +48,7 @@ public class CompleteChatClient(string endpoint, string deploymentName, string a
 
         var asyncCollectionResult = client.CompleteChatStreamingAsync(
             [
-                new SystemChatMessage($"请根据以下内容使用简体中文回答用户的问题：\n{context}。注意不要基于除了提供的内容之外进行回答。"),
+                new SystemChatMessage($"根据提供的内容使用简体中文回答用户的问题。注意：不要在提供的内容之外进行回答。内容如下：\n{context}。"),
                 new UserChatMessage(input)
             ],
             cancellationToken: cancellationToken);
