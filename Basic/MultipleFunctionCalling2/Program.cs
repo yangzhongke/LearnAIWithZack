@@ -1,7 +1,13 @@
 ﻿using System.ClientModel;
+using System.Text;
 using System.Text.Json;
+using HttpMataki.NET.Auto;
 using OpenAI;
 using OpenAI.Chat;
+
+HttpClientAutoInterceptor.StartInterception();
+
+Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
 var chatApiKey = Environment.GetEnvironmentVariable("OpenAI__ChatApiKey");
 
