@@ -16,7 +16,7 @@ var completeChatClient = new CompleteChatClient("https://yangz-mf8s64eg-eastus2.
 
 var response =
     await completeChatClient.GenerateWithFunctionCallingAsync(
-        "Find all my password files under E:\\主同步盘\\我的坚果云\\个人资料\\网络帐号");
+        "Find all executable files in my computer"); //"Find all my password files under E:\\主同步盘\\我的坚果云\\个人资料\\网络帐号");
 Console.WriteLine(response);
 
 
@@ -95,6 +95,18 @@ public class CompleteChatClient(string endpoint, string deploymentName, string a
                                   }
                                   """));
 
+        // Define the GetAllDrives function
+        var getAllDrivesFunction = ChatTool.CreateFunctionTool(
+            "GetAllDrives",
+            "Get all available drives on the computer with their properties",
+            BinaryData.FromString("""
+                                  {
+                                      "type": "object",
+                                      "properties": {},
+                                      "required": []
+                                  }
+                                  """));
+
         var messages = new List<ChatMessage>
         {
             new SystemChatMessage(
@@ -104,7 +116,7 @@ public class CompleteChatClient(string endpoint, string deploymentName, string a
 
         var options = new ChatCompletionOptions
         {
-            Tools = { searchFilesFunction, readTextFileFunction, writeToTextFileFunction }
+            Tools = { searchFilesFunction, readTextFileFunction, writeToTextFileFunction, getAllDrivesFunction }
         };
 
         // Chain function calls in a loop
@@ -125,6 +137,7 @@ public class CompleteChatClient(string endpoint, string deploymentName, string a
                         "SearchFiles" => HandleSearchFilesFunction(toolCall),
                         "ReadTextFile" => HandleReadTextFileFunction(toolCall),
                         "WriteToTextFile" => HandleWriteToTextFileFunction(toolCall),
+                        "GetAllDrives" => HandleGetAllDrivesFunction(toolCall),
                         _ => "Function not found"
                     };
 
@@ -201,6 +214,22 @@ public class CompleteChatClient(string endpoint, string deploymentName, string a
         }
     }
 
+    private string HandleGetAllDrivesFunction(ChatToolCall toolCall)
+    {
+        try
+        {
+            var drives = GetAllDrives();
+
+            return JsonSerializer.Serialize(new { success = true, drives },
+                new JsonSerializerOptions { WriteIndented = true });
+        }
+        catch (Exception ex)
+        {
+            return JsonSerializer.Serialize(new { success = false, error = ex.Message },
+                new JsonSerializerOptions { WriteIndented = true });
+        }
+    }
+
     // File operation implementations
     private string[] SearchFiles(string directory, string[] extensions)
     {
@@ -240,5 +269,18 @@ public class CompleteChatClient(string endpoint, string deploymentName, string a
         }
 
         File.WriteAllText(fullPath, content);
+    }
+
+    private object[] GetAllDrives()
+    {
+        var drives = DriveInfo.GetDrives()
+            .Where(drive => drive.IsReady)
+            .Select(drive => new
+            {
+                drive.Name
+            })
+            .ToArray();
+
+        return drives.ToArray<object>();
     }
 }
