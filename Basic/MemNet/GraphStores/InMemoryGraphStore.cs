@@ -1,4 +1,3 @@
-using MemNet.Abstractions;
 using MemNet.Models;
 
 namespace MemNet.GraphStores;
@@ -6,7 +5,7 @@ namespace MemNet.GraphStores;
 /// <summary>
 ///     内存图存储实现（用于开发和测试）
 /// </summary>
-public class InMemoryGraphStore : IGraphStore
+public class InMemoryGraphStore
 {
     private readonly Dictionary<string, Entity> _entities = new();
     private readonly object _lock = new();

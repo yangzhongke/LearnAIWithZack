@@ -1,6 +1,5 @@
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
-using MemNet.Abstractions;
 using MemNet.Config;
 using Microsoft.Extensions.Options;
 
@@ -9,7 +8,7 @@ namespace MemNet.Embedders;
 /// <summary>
 /// OpenAI 嵌入生成器实现（复刻 Mem0 embeddings/openai.py）
 /// </summary>
-public class OpenAIEmbedder : IEmbedder
+public class OpenAIEmbedder
 {
     private readonly HttpClient _httpClient;
     private readonly EmbedderConfig _config;

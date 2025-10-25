@@ -1,4 +1,3 @@
-using MemNet.Abstractions;
 using MemNet.Config;
 using MemNet.Core;
 using MemNet.Embedders;
@@ -26,18 +25,18 @@ public static class ServiceCollectionExtensions
         services.Configure<MemoryConfig>(configuration.GetSection("MemNet"));
 
         // 注册核心服务
-        services.AddScoped<IMemoryService, MemoryService>();
+        services.AddScoped<MemoryService>();
 
         // 注册默认实现
-        services.AddHttpClient<ILLMProvider, OpenAIProvider>();
-        services.AddHttpClient<IEmbedder, OpenAIEmbedder>();
-        services.AddSingleton<IVectorStore, InMemoryVectorStore>();
+        services.AddHttpClient<OpenAIProvider>();
+        services.AddHttpClient<OpenAIEmbedder>();
+        services.AddSingleton<InMemoryVectorStore>();
 
         // 注册知识图谱存储（可选）
         var config = configuration.GetSection("MemNet").Get<MemoryConfig>();
         if (config?.GraphStore != null)
         {
-            services.AddSingleton<IGraphStore, InMemoryGraphStore>();
+            services.AddSingleton<InMemoryGraphStore>();
         }
 
         return services;
@@ -54,67 +53,13 @@ public static class ServiceCollectionExtensions
         services.Configure(configureOptions);
 
         // 注册核心服务
-        services.AddScoped<IMemoryService, MemoryService>();
+        services.AddScoped<MemoryService>();
 
         // 注册默认实现
-        services.AddHttpClient<ILLMProvider, OpenAIProvider>();
-        services.AddHttpClient<IEmbedder, OpenAIEmbedder>();
-        services.AddSingleton<IVectorStore, InMemoryVectorStore>();
+        services.AddHttpClient<OpenAIProvider>();
+        services.AddHttpClient<OpenAIEmbedder>();
+        services.AddSingleton<InMemoryVectorStore>();
 
-        return services;
-    }
-
-    /// <summary>
-    ///     使用自定义向量存储
-    /// </summary>
-    public static IServiceCollection WithVectorStore<T>(
-        this IServiceCollection services)
-        where T : class, IVectorStore
-    {
-        services.AddSingleton<IVectorStore, T>();
-        return services;
-    }
-
-    /// <summary>
-    ///     使用自定义 LLM 提供者
-    /// </summary>
-    public static IServiceCollection WithLLMProvider<T>(
-        this IServiceCollection services)
-        where T : class, ILLMProvider
-    {
-        services.AddHttpClient<ILLMProvider, T>();
-        return services;
-    }
-
-    /// <summary>
-    ///     使用自定义嵌入器
-    /// </summary>
-    public static IServiceCollection WithEmbedder<T>(
-        this IServiceCollection services)
-        where T : class, IEmbedder
-    {
-        services.AddHttpClient<IEmbedder, T>();
-        return services;
-    }
-
-    /// <summary>
-    ///     启用知识图谱存储
-    /// </summary>
-    public static IServiceCollection WithGraphStore<T>(
-        this IServiceCollection services)
-        where T : class, IGraphStore
-    {
-        services.AddSingleton<IGraphStore, T>();
-        return services;
-    }
-
-    /// <summary>
-    ///     启用默认知识图谱存储（内存存储）
-    /// </summary>
-    public static IServiceCollection WithGraphStore(
-        this IServiceCollection services)
-    {
-        services.AddSingleton<IGraphStore, InMemoryGraphStore>();
         return services;
     }
 }

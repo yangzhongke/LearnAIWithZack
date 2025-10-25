@@ -1,6 +1,9 @@
-using MemNet.Abstractions;
 using MemNet.Config;
+using MemNet.Embedders;
+using MemNet.GraphStores;
+using MemNet.LLMs;
 using MemNet.Models;
+using MemNet.VectorStores;
 using Microsoft.Extensions.Options;
 
 namespace MemNet.Core;
@@ -8,20 +11,20 @@ namespace MemNet.Core;
 /// <summary>
 ///     记忆服务核心实现（复刻 Mem0 Memory 类）
 /// </summary>
-public class MemoryService : IMemoryService
+public class MemoryService
 {
     private readonly MemoryConfig _config;
-    private readonly IEmbedder _embedder;
-    private readonly IGraphStore? _graphStore;
-    private readonly ILLMProvider _llm;
-    private readonly IVectorStore _vectorStore;
+    private readonly OpenAIEmbedder _embedder;
+    private readonly InMemoryGraphStore? _graphStore;
+    private readonly OpenAIProvider _llm;
+    private readonly InMemoryVectorStore _vectorStore;
 
     public MemoryService(
-        IVectorStore vectorStore,
-        ILLMProvider llm,
-        IEmbedder embedder,
+        InMemoryVectorStore vectorStore,
+        OpenAIProvider llm,
+        OpenAIEmbedder embedder,
         IOptions<MemoryConfig> config,
-        IGraphStore? graphStore = null)
+        InMemoryGraphStore? graphStore = null)
     {
         _vectorStore = vectorStore;
         _llm = llm;

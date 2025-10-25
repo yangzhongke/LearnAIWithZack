@@ -1,4 +1,3 @@
-using MemNet.Abstractions;
 using MemNet.Models;
 
 namespace MemNet.VectorStores;
@@ -6,7 +5,7 @@ namespace MemNet.VectorStores;
 /// <summary>
 /// 内存向量存储实现（用于开发和测试）
 /// </summary>
-public class InMemoryVectorStore : IVectorStore
+public class InMemoryVectorStore
 {
     private readonly Dictionary<string, MemoryItem> _memories = new();
     private readonly object _lock = new();

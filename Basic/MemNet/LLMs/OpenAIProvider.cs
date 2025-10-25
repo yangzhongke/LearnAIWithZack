@@ -1,7 +1,6 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using MemNet.Abstractions;
 using MemNet.Config;
 using MemNet.Models;
 using Microsoft.Extensions.Options;
@@ -9,9 +8,9 @@ using Microsoft.Extensions.Options;
 namespace MemNet.LLMs;
 
 /// <summary>
-///     OpenAI LLM 提供者实现（复刻 Mem0 llms/openai.py）
+///     OpenAI LLM 提供者实现
 /// </summary>
-public class OpenAIProvider : ILLMProvider
+public class OpenAIProvider
 {
     private readonly LLMConfig _config;
     private readonly HttpClient _httpClient;
