@@ -2,12 +2,12 @@ namespace MemNet.Internals;
 
 public static class HttpResponseExtensions
 {
-    public static async Task<HttpResponseMessage> EnsureSuccessWithContentAsync(this HttpResponseMessage response,
+    public static async Task EnsureSuccessWithContentAsync(this HttpResponseMessage response,
         CancellationToken ct = default)
     {
         if (response.IsSuccessStatusCode)
         {
-            return response;
+            return;
         }
 
         string content = await response.Content.ReadAsStringAsync(ct);
