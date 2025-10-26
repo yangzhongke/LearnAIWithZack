@@ -1,7 +1,6 @@
 using MemNet.Config;
 using MemNet.Core;
 using MemNet.Embedders;
-using MemNet.GraphStores;
 using MemNet.LLMs;
 using MemNet.VectorStores;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,8 +30,6 @@ public static class ServiceCollectionExtensions
         services.AddHttpClient<OpenAIProvider>();
         services.AddHttpClient<OpenAIEmbedder>();
         services.AddSingleton<InMemoryVectorStore>();
-        // 注册知识图谱存储
-        services.AddSingleton<InMemoryGraphStore>();
 
         return services;
     }

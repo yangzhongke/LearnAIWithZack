@@ -1,6 +1,5 @@
 using MemNet.Config;
 using MemNet.Embedders;
-using MemNet.GraphStores;
 using MemNet.LLMs;
 using MemNet.Models;
 using MemNet.VectorStores;
@@ -15,7 +14,6 @@ public class MemoryService
 {
     private readonly MemoryConfig _config;
     private readonly OpenAIEmbedder _embedder;
-    private readonly InMemoryGraphStore _graphStore;
     private readonly OpenAIProvider _llm;
     private readonly InMemoryVectorStore _vectorStore;
 
@@ -23,13 +21,11 @@ public class MemoryService
         InMemoryVectorStore vectorStore,
         OpenAIProvider llm,
         OpenAIEmbedder embedder,
-        IOptions<MemoryConfig> config,
-        InMemoryGraphStore graphStore)
+        IOptions<MemoryConfig> config)
     {
         _vectorStore = vectorStore;
         _llm = llm;
         _embedder = embedder;
-        _graphStore = graphStore;
         _config = config.Value;
     }
 
@@ -52,8 +48,6 @@ public class MemoryService
                 Data = extracted.Data,
                 Embedding = embedding,
                 UserId = request.UserId,
-                AgentId = request.AgentId,
-                RunId = request.RunId,
                 Metadata = request.Metadata ?? new Dictionary<string, object>(),
                 CreatedAt = DateTime.UtcNow
             });
@@ -102,14 +96,7 @@ public class MemoryService
             await _vectorStore.UpdateAsync(toUpdate, ct);
         }
 
-        // 6. 更新知识图谱
-        var entities = await _llm.ExtractEntitiesAsync(messagesText, ct);
-        if (entities.Any())
-        {
-            await _graphStore.AddRelationsAsync(entities, ct);
-        }
-
-        // 7. 构建响应
+        // 6. 构建响应
         return new AddMemoryResponse
         {
             Results = toInsert.Select(m => new MemoryResult
@@ -139,11 +126,7 @@ public class MemoryService
             ct);
 
         // 3. 使用 LLM 重排序（可选）
-        if (_config.EnableReranking)
-        {
-            results = await _llm.RerankAsync(request.Query, results, ct);
-        }
-
+        results = await _llm.RerankAsync(request.Query, results, ct);
         return results;
     }
 

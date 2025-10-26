@@ -145,30 +145,6 @@ public class OpenAIProvider
         return reranked;
     }
 
-    public async Task<List<EntityRelation>> ExtractEntitiesAsync(string text, CancellationToken ct = default)
-    {
-        var systemPrompt = """
-                           You are an entity and relationship extraction expert. Extract entities and their relationships from the text.
-                           Return a JSON object with this structure:
-                           {
-                               "relations": [
-                                   {
-                                       "source": {"name": "entity1", "type": "Person"},
-                                       "target": {"name": "entity2", "type": "Location"},
-                                       "relationType": "lives_in"
-                                   }
-                               ]
-                           }
-
-                           Extract meaningful entities (Person, Organization, Location, Concept, etc.) and their relationships.
-                           """;
-
-
-        var content = await GenerateTextAsync(systemPrompt, text, ct);
-        var extraction = JsonSerializer.Deserialize<EntityExtractionResult>(content);
-        return extraction?.Relations ?? new List<EntityRelation>();
-    }
-
     // 内部类用于 JSON 反序列化
     private class ChatCompletionResponse
     {
@@ -193,10 +169,5 @@ public class OpenAIProvider
     private class RankingResult
     {
         [JsonPropertyName("ranked_indices")] public List<int> RankedIndices { get; set; } = new();
-    }
-
-    private class EntityExtractionResult
-    {
-        [JsonPropertyName("relations")] public List<EntityRelation> Relations { get; set; } = new();
     }
 }

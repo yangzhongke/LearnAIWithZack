@@ -12,18 +12,8 @@ public class MemoryConfig
     /// 去重阈值（余弦相似度）
     /// </summary>
     public float DuplicateThreshold { get; set; } = 0.9f;
-
-    /// <summary>
-    /// 是否启用重排序
-    /// </summary>
-    public bool EnableReranking { get; set; } = false;
-
-    /// <summary>
-    /// 历史消息限制
-    /// </summary>
-    public int HistoryLimit { get; set; } = 10;
+    
 }
-
 public class LLMConfig
 {
     public string Model { get; set; } = "gpt-4";

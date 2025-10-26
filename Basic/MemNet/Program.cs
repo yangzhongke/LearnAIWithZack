@@ -14,9 +14,7 @@ services.AddMemNet(config =>
     config.LLM.Model = "gpt-5-nano";
     config.LLM.ApiKey = Environment.GetEnvironmentVariable("OpenAIChatKey");
 
-    config.EnableReranking = true;
 });
-
 await using var sp = services.BuildServiceProvider();
 var memoryService = sp.GetRequiredService<MemoryService>();
 await memoryService.AddAsync(new AddMemoryRequest
