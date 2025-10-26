@@ -15,7 +15,7 @@ public class MemoryService
 {
     private readonly MemoryConfig _config;
     private readonly OpenAIEmbedder _embedder;
-    private readonly InMemoryGraphStore? _graphStore;
+    private readonly InMemoryGraphStore _graphStore;
     private readonly OpenAIProvider _llm;
     private readonly InMemoryVectorStore _vectorStore;
 
@@ -24,7 +24,7 @@ public class MemoryService
         OpenAIProvider llm,
         OpenAIEmbedder embedder,
         IOptions<MemoryConfig> config,
-        InMemoryGraphStore? graphStore = null)
+        InMemoryGraphStore graphStore)
     {
         _vectorStore = vectorStore;
         _llm = llm;
@@ -102,14 +102,11 @@ public class MemoryService
             await _vectorStore.UpdateAsync(toUpdate, ct);
         }
 
-        // 6. 更新知识图谱（如果启用）
-        if (_graphStore != null && _config.GraphStore != null)
+        // 6. 更新知识图谱
+        var entities = await _llm.ExtractEntitiesAsync(messagesText, ct);
+        if (entities.Any())
         {
-            var entities = await _llm.ExtractEntitiesAsync(messagesText, ct);
-            if (entities.Any())
-            {
-                await _graphStore.AddRelationsAsync(entities, ct);
-            }
+            await _graphStore.AddRelationsAsync(entities, ct);
         }
 
         // 7. 构建响应

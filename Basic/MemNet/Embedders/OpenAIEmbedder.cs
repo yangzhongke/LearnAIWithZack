@@ -45,21 +45,6 @@ public class OpenAIEmbedder
         return result?.Data?[0].Embedding ?? Array.Empty<float>();
     }
 
-    public async Task<List<float[]>> EmbedBatchAsync(List<string> texts, CancellationToken ct = default)
-    {
-        var request = new
-        {
-            input = texts,
-            model = _config.Model
-        };
-
-        var response = await _httpClient.PostAsJsonAsync("embeddings", request, ct);
-        response.EnsureSuccessStatusCode();
-
-        var result = await response.Content.ReadFromJsonAsync<EmbeddingResponse>(ct);
-        return result?.Data?.Select(d => d.Embedding).ToList() ?? new List<float[]>();
-    }
-
     // 内部类用于 JSON 反序列化
     private class EmbeddingResponse
     {
