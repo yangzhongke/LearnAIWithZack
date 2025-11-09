@@ -38,6 +38,8 @@ while (true)
     });
 
     string memory = string.Join('\n', searchResults.Select(e => e.Memory.UpdatedAt?.ToString() + e.Memory.Data));
+    Console.WriteLine("Memory:");
+    Console.WriteLine(memory);
     var answer = await completeChatClient.GenerateTextAsync(question, memory);
     Console.Write("AI：");
     Console.WriteLine(answer);
