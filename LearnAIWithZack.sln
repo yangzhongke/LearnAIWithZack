@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Basic1", "Basic\Basic1\Basic1.csproj", "{805A74E4-3EEA-41BE-95E9-03C9063F4C2E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BasicRAG1", "Basic\BasicRAG1\BasicRAG1.csproj", "{805A74E4-3EEA-41BE-95E9-03C9063F4C2E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Basic", "Basic", "{A04CFD48-6FCD-4620-9823-70692E61E429}"
 EndProject
