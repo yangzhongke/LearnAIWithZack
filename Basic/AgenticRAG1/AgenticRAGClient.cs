@@ -158,14 +158,14 @@ public class AgenticRAGClient
     {
         return ChatTool.CreateFunctionTool(
             "search_articles",
-            "Search for articles by keyword in title or content",
+            "Search for articles using semantic similarity. Finds articles related to the keyword even without exact matches - supports fuzzy/semantic search.",
             BinaryData.FromString("""
                 {
                     "type": "object",
                     "properties": {
                         "keyword": {
                             "type": "string",
-                            "description": "The keyword or phrase to search for in article titles and content"
+                            "description": "The keyword or phrase to search for semantically in article titles and content"
                         }
                     },
                     "required": ["keyword"]

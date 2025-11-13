@@ -13,17 +13,20 @@ if (string.IsNullOrEmpty(chatApiKey))
     return;
 }
 
-Console.WriteLine("=== Agentic RAG Demo ===\n");
+Console.WriteLine("=== Agentic RAG Demo with InMemoryVectorStore ===\n");
 
-// Part 1: Initialize Database and Insert Sample Articles
-Console.WriteLine("Part 1: Initializing database and inserting sample articles...\n");
-using var context = new DatabaseContext();
-var articleService = new ArticleService(context);
+// Part 1: Initialize Vector Store and Insert Sample Articles
+Console.WriteLine("Part 1: Initializing vector store and inserting sample articles...\n");
+var vectorStore = new VectorStoreService(
+    "https://yangz-mf8s64eg-eastus2.cognitiveservices.azure.com/",
+    chatApiKey
+);
+var articleService = new ArticleService(vectorStore);
 await articleService.InitializeDatabaseAsync();
 Console.WriteLine();
 
-// Part 2: Agentic RAG Chat
-Console.WriteLine("Part 2: Agentic RAG - Ask questions about the articles\n");
+// Part 2: Agentic RAG Chat with Semantic Search
+Console.WriteLine("Part 2: Agentic RAG - Ask questions about the articles (now with semantic search!)\n");
 var ragClient = new AgenticRAGClient(
     "https://yangz-mf8s64eg-eastus2.cognitiveservices.azure.com/openai/v1/",
     "gpt-5-nano",
