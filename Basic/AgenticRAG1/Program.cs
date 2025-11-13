@@ -6,6 +6,7 @@ Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 HttpClientAutoInterceptor.StartInterception();
 
 var chatApiKey = Environment.GetEnvironmentVariable("AI__ChatApiKey");
+var embeddingApiKey = Environment.GetEnvironmentVariable("AI__EmbeddingApiKey");
 
 if (string.IsNullOrEmpty(chatApiKey))
 {
@@ -18,8 +19,8 @@ Console.WriteLine("=== Agentic RAG Demo with InMemoryVectorStore ===\n");
 // Part 1: Initialize Vector Store and Insert Sample Articles
 Console.WriteLine("Part 1: Initializing vector store and inserting sample articles...\n");
 var vectorStore = new VectorStoreService(
-    "https://yangz-mf8s64eg-eastus2.cognitiveservices.azure.com/",
-    chatApiKey
+    "https://personalopenai1.openai.azure.com/",
+    embeddingApiKey, "text-embedding-3-large"
 );
 var articleService = new ArticleService(vectorStore);
 await articleService.InitializeDatabaseAsync();

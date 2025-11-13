@@ -238,7 +238,7 @@ public class ArticleService
         var records = await _vectorStore.SearchArticlesAsync(keyword);
         return records.Select(r => new Article
         {
-            Id = int.Parse(r.Id),
+            Id = r.OriginalId,
             Title = r.Title,
             Content = r.Content,
             Category = r.Category,
@@ -253,7 +253,7 @@ public class ArticleService
         
         return new Article
         {
-            Id = int.Parse(record.Id),
+            Id = record.OriginalId,
             Title = record.Title,
             Content = record.Content,
             Category = record.Category,
@@ -268,7 +268,7 @@ public class ArticleService
             .Where(r => r.Category.Equals(category, StringComparison.OrdinalIgnoreCase))
             .Select(r => new Article
             {
-                Id = int.Parse(r.Id),
+                Id = r.OriginalId,
                 Title = r.Title,
                 Content = r.Content,
                 Category = r.Category,
@@ -282,7 +282,7 @@ public class ArticleService
         var records = await _vectorStore.GetAllArticlesAsync();
         return records.Select(r => new Article
         {
-            Id = int.Parse(r.Id),
+            Id = r.OriginalId,
             Title = r.Title,
             Content = r.Content,
             Category = r.Category,

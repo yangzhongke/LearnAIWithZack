@@ -1,25 +1,21 @@
-using System.Text.Json.Serialization;
 using AgenticRAG1.Models;
 using Azure;
 using Azure.AI.OpenAI;
+using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel.Connectors.InMemory;
 using OpenAI.Embeddings;
-#pragma warning disable SKEXP0001
-#pragma warning disable SKEXP0020
-#pragma warning disable SKEXP0050
+
 
 namespace AgenticRAG1;
 
 public class VectorStoreService
 {
-    private readonly InMemoryVectorStore _vectorStore;
-    private readonly InMemoryVectorStoreRecordCollection<string, ArticleRecord> _collection;
+    private readonly InMemoryVectorStoreRecordCollection<Guid, ArticleRecord> _collection;
     private readonly EmbeddingClient _embeddingClient;
 
-    public VectorStoreService(string endpoint, string apiKey, string embeddingModel = "text-embedding-3-small")
+    public VectorStoreService(string endpoint, string apiKey, string embeddingModel)
     {
-        _vectorStore = new InMemoryVectorStore();
-        _collection = new InMemoryVectorStoreRecordCollection<string, ArticleRecord>("articles");
+        _collection = new InMemoryVectorStoreRecordCollection<Guid, ArticleRecord>("articles");
         var azureOpenAIClient = new AzureOpenAIClient(new Uri(endpoint), new AzureKeyCredential(apiKey));
         _embeddingClient = azureOpenAIClient.GetEmbeddingClient(embeddingModel);
     }
@@ -41,12 +37,13 @@ public class VectorStoreService
         
         var record = new ArticleRecord
         {
-            Id = article.Id.ToString(),
+            Id = Guid.NewGuid(),
+            OriginalId = article.Id,
             Title = article.Title,
             Content = article.Content,
             Category = article.Category,
             PublishDate = article.PublishDate,
-            Embedding = embedding
+            Vector = embedding
         };
 
         await _collection.UpsertAsync(record);
@@ -69,21 +66,24 @@ public class VectorStoreService
 
     public async Task<ArticleRecord?> GetArticleByIdAsync(int id)
     {
-        return await _collection.GetAsync(id.ToString());
+        var allRecords = await GetAllArticlesAsync();
+        return allRecords.FirstOrDefault(r => r.OriginalId == id);
     }
 
     public async Task<List<ArticleRecord>> GetAllArticlesAsync()
     {
         var allRecords = new List<ArticleRecord>();
-        
-        // Get all records from the in-memory collection
-        await foreach (var record in _collection.GetBatchAsync(Enumerable.Range(1, 1000).Select(i => i.ToString())))
+
+        // Get all records from the in-memory collection by trying common GUIDs
+        // Since this is in-memory and we don't have a "get all" method, we'll use search
+        var dummyVector = new ReadOnlyMemory<float>(new float[1536]);
+        var searchResults = await _collection.VectorizedSearchAsync(dummyVector, new() { Top = 1000 });
+
+        await foreach (var result in searchResults.Results)
         {
-            if (record != null)
-            {
-                allRecords.Add(record);
-            }
+            allRecords.Add(result.Record);
         }
+        
         
         return allRecords;
     }
@@ -91,21 +91,17 @@ public class VectorStoreService
 
 public class ArticleRecord
 {
-    [JsonPropertyName("id")]
-    public string Id { get; set; } = string.Empty;
+    [VectorStoreRecordKey] public Guid Id { get; set; }
+
+    public int OriginalId { get; set; }
     
-    [JsonPropertyName("title")]
     public string Title { get; set; } = string.Empty;
     
-    [JsonPropertyName("content")]
     public string Content { get; set; } = string.Empty;
     
-    [JsonPropertyName("category")]
     public string Category { get; set; } = string.Empty;
     
-    [JsonPropertyName("publishDate")]
     public DateTime PublishDate { get; set; }
-    
-    [JsonPropertyName("embedding")]
-    public ReadOnlyMemory<float> Embedding { get; set; }
+
+    public ReadOnlyMemory<float> Vector { get; set; }
 }
