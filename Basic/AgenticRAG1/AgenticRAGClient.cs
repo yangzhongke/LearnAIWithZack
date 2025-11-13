@@ -1,8 +1,6 @@
 using System.ClientModel;
-using System.Text;
 using System.Text.Json;
 using AgenticRAG1.Models;
-using HttpMataki.NET.Auto;
 using OpenAI;
 using OpenAI.Chat;
 

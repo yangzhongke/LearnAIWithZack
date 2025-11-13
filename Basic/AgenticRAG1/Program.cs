@@ -31,24 +31,6 @@ var ragClient = new AgenticRAGClient(
     articleService
 );
 
-// Example queries
-var queries = new[]
-{
-    "What articles do you have about artificial intelligence?",
-    "Tell me about the latest developments in healthcare",
-    "What are the main environmental concerns discussed in your articles?",
-    "Can you summarize what you know about electric vehicles?"
-};
-
-foreach (var query in queries)
-{
-    Console.WriteLine($"User: {query}");
-    var response = await ragClient.ChatAsync(query);
-    Console.WriteLine($"Assistant: {response}\n");
-    Console.WriteLine(new string('-', 80));
-    Console.WriteLine();
-}
-
 // Interactive mode
 Console.WriteLine("\nEntering interactive mode. Type 'exit' to quit.\n");
 while (true)
@@ -64,5 +46,3 @@ while (true)
     var response = await ragClient.ChatAsync(userInput);
     Console.WriteLine($"Assistant: {response}\n");
 }
-
-Console.WriteLine("Thank you for using Agentic RAG Demo!");
