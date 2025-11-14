@@ -245,48 +245,4 @@ public class ArticleService
             PublishDate = r.PublishDate
         }).ToList();
     }
-
-    public async Task<Article?> GetArticleByIdAsync(int id)
-    {
-        var record = await _vectorStore.GetArticleByIdAsync(id);
-        if (record == null) return null;
-        
-        return new Article
-        {
-            Id = record.OriginalId,
-            Title = record.Title,
-            Content = record.Content,
-            Category = record.Category,
-            PublishDate = record.PublishDate
-        };
-    }
-
-    public async Task<List<Article>> GetArticlesByCategoryAsync(string category)
-    {
-        var allRecords = await _vectorStore.GetAllArticlesAsync();
-        return allRecords
-            .Where(r => r.Category.Equals(category, StringComparison.OrdinalIgnoreCase))
-            .Select(r => new Article
-            {
-                Id = r.OriginalId,
-                Title = r.Title,
-                Content = r.Content,
-                Category = r.Category,
-                PublishDate = r.PublishDate
-            })
-            .ToList();
-    }
-
-    public async Task<List<Article>> GetAllArticlesAsync()
-    {
-        var records = await _vectorStore.GetAllArticlesAsync();
-        return records.Select(r => new Article
-        {
-            Id = r.OriginalId,
-            Title = r.Title,
-            Content = r.Content,
-            Category = r.Category,
-            PublishDate = r.PublishDate
-        }).ToList();
-    }
 }

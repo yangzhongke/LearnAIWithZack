@@ -63,30 +63,6 @@ public class VectorStoreService
         
         return articles;
     }
-
-    public async Task<ArticleRecord?> GetArticleByIdAsync(int id)
-    {
-        var allRecords = await GetAllArticlesAsync();
-        return allRecords.FirstOrDefault(r => r.OriginalId == id);
-    }
-
-    public async Task<List<ArticleRecord>> GetAllArticlesAsync()
-    {
-        var allRecords = new List<ArticleRecord>();
-
-        // Get all records from the in-memory collection by trying common GUIDs
-        // Since this is in-memory and we don't have a "get all" method, we'll use search
-        var dummyVector = new ReadOnlyMemory<float>(new float[1536]);
-        var searchResults = await _collection.VectorizedSearchAsync(dummyVector, new() { Top = 1000 });
-
-        await foreach (var result in searchResults.Results)
-        {
-            allRecords.Add(result.Record);
-        }
-        
-        
-        return allRecords;
-    }
 }
 
 public class ArticleRecord
@@ -103,5 +79,6 @@ public class ArticleRecord
     
     public DateTime PublishDate { get; set; }
 
+    [VectorStoreRecordVector]
     public ReadOnlyMemory<float> Vector { get; set; }
 }

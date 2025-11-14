@@ -2,8 +2,9 @@ using System.Text;
 using AgenticRAG1;
 using HttpMataki.NET.Auto;
 
-Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 HttpClientAutoInterceptor.StartInterception();
+
+Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
 var chatApiKey = Environment.GetEnvironmentVariable("AI__ChatApiKey");
 var embeddingApiKey = Environment.GetEnvironmentVariable("AI__EmbeddingApiKey");
@@ -27,7 +28,6 @@ await articleService.InitializeDatabaseAsync();
 Console.WriteLine();
 
 // Part 2: Agentic RAG Chat with Semantic Search
-Console.WriteLine("Part 2: Agentic RAG - Ask questions about the articles (now with semantic search!)\n");
 var ragClient = new AgenticRAGClient(
     "https://yangz-mf8s64eg-eastus2.cognitiveservices.azure.com/openai/v1/",
     "gpt-5-nano",
@@ -36,7 +36,8 @@ var ragClient = new AgenticRAGClient(
 );
 
 // Interactive mode
-Console.WriteLine("\nEntering interactive mode. Type 'exit' to quit.\n");
+Console.WriteLine(
+    "\nPart 2: Agentic RAG - Ask questions about the articles (now with semantic search!). Type 'exit' to quit.\n");
 while (true)
 {
     Console.Write("You: ");
