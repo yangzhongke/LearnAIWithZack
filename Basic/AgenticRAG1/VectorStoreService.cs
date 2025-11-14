@@ -49,7 +49,7 @@ public class VectorStoreService
         await _collection.UpsertAsync(record);
     }
 
-    public async Task<List<ArticleRecord>> SearchArticlesAsync(string query, int limit = 100)
+    public async Task<List<ArticleRecord>> SearchArticlesAsync(string query, int limit)
     {
         var queryEmbedding = await GenerateEmbeddingAsync(query);
         

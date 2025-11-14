@@ -235,7 +235,7 @@ public class ArticleService
 
     public async Task<List<Article>> SearchArticlesAsync(string keyword)
     {
-        var records = await _vectorStore.SearchArticlesAsync(keyword);
+        var records = await _vectorStore.SearchArticlesAsync(keyword, 5);
         return records.Select(r => new Article
         {
             Id = r.OriginalId,

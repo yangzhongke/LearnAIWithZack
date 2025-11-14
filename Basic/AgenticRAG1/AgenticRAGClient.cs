@@ -58,6 +58,7 @@ public class AgenticRAGClient
 
             if (response.Value.FinishReason == ChatFinishReason.ToolCalls)
             {
+                chats.Add(new AssistantChatMessage(response.Value));
                 foreach (var toolCall in response.Value.ToolCalls)
                 {
                     var functionResult = await ExecuteFunctionAsync(toolCall.FunctionName, toolCall.FunctionArguments);
