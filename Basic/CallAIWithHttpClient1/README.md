@@ -44,11 +44,16 @@ A simple example demonstrating how to call OpenAI-compatible LLM APIs using Http
 ### HttpClient Configuration
 
 The application configures `HttpClient` with:
-- Base URL: `https://api.openai.com/v1`
+- Base URL: `https://api.openai.com/v1/` (must end with trailing slash)
 - Bearer token authentication using the API key from environment variable
 - Relative endpoint path: `chat/completions` (without leading slash)
 
-**Important:** When using `HttpClient.BaseAddress`, relative paths should NOT start with a slash. Using `chat/completions` instead of `/chat/completions` ensures the URL correctly resolves to `https://api.openai.com/v1/chat/completions`.
+**Important:** When using `HttpClient.BaseAddress`:
+1. The BaseAddress **must** end with a trailing slash (`/`)
+2. Relative paths should **NOT** start with a slash
+3. This ensures the URL correctly resolves to `https://api.openai.com/v1/chat/completions`
+
+Without the trailing slash on BaseAddress, the URI resolution would drop the `/v1` part, resulting in `https://api.openai.com/chat/completions`, which causes a 404 error.
 
 ### Strong-Typed Models
 
@@ -78,9 +83,14 @@ Token Usage:
 ### 404 Not Found Error
 
 If you encounter a 404 error, ensure:
-1. The endpoint path does not start with a slash when using `BaseAddress`
-2. Your API key is valid
-3. The base URL is correct for your OpenAI-compatible service
+1. **The BaseAddress ends with a trailing slash** (`/v1/` not `/v1`)
+2. The endpoint path does not start with a slash (`chat/completions` not `/chat/completions`)
+3. Your API key is valid
+4. The base URL is correct for your OpenAI-compatible service
+
+**Why this matters:** 
+- BaseAddress: `https://api.openai.com/v1` (no trailing slash) + path: `/chat/completions` = `https://api.openai.com/chat/completions` ❌
+- BaseAddress: `https://api.openai.com/v1/` (with trailing slash) + path: `chat/completions` = `https://api.openai.com/v1/chat/completions` ✅
 
 ### Missing API Key
 
@@ -88,12 +98,12 @@ If you see "Error: OPENAI_API_KEY environment variable is not set", make sure yo
 
 ## Alternative API Endpoints
 
-To use with other OpenAI-compatible services (like Azure OpenAI, Ollama, etc.), modify the `baseUrl` variable:
+To use with other OpenAI-compatible services (like Azure OpenAI, Ollama, etc.), modify the `baseUrl` variable (ensure it ends with a trailing slash):
 
 ```csharp
 // For Azure OpenAI
-var baseUrl = "https://YOUR-RESOURCE.openai.azure.com/openai/deployments/YOUR-DEPLOYMENT";
+var baseUrl = "https://YOUR-RESOURCE.openai.azure.com/openai/deployments/YOUR-DEPLOYMENT/";
 
 // For Ollama (local)
-var baseUrl = "http://127.0.0.1:11434/v1";
+var baseUrl = "http://127.0.0.1:11434/v1/";
 ```

@@ -11,8 +11,8 @@ if (string.IsNullOrEmpty(apiKey))
     return;
 }
 
-// Configure HttpClient with base URL
-var baseUrl = "https://api.openai.com/v1";
+// Configure HttpClient with base URL (must end with trailing slash)
+var baseUrl = "https://api.openai.com/v1/";
 using var httpClient = new HttpClient
 {
     BaseAddress = new Uri(baseUrl)
