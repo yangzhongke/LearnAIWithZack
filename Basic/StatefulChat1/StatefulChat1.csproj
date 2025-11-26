@@ -13,7 +13,7 @@
         <PackageReference Include="HttpMataki.NET.Auto" Version="1.0.3"/>
         <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.10" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.10" />
-        <PackageReference Include="OpenAI" Version="2.4.0"/>
+        <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.0.1-preview.1.25571.5"/>
     </ItemGroup>
 
     <ItemGroup>

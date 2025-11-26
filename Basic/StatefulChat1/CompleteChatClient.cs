@@ -21,7 +21,8 @@ public class CompleteChatClient(string endpoint, string deploymentName, string a
 
         ChatCompletion completion = await client.CompleteChatAsync(
         [
-            new SystemChatMessage($"根据提供的内容回答用户的问题。如下是对这个用户的记忆：\n{memory}。"),
+            new SystemChatMessage(
+                $"Answer the user's question based on the provided content. Below is the memory about this user:\n{memory}"),
             new UserChatMessage(input)
         ], cancellationToken: cancellationToken);
 
@@ -48,7 +49,8 @@ public class CompleteChatClient(string endpoint, string deploymentName, string a
 
         var asyncCollectionResult = client.CompleteChatStreamingAsync(
             [
-                new SystemChatMessage($"根据提供的内容回答用户的问题。如下是对这个用户的记忆：\n{memory}。"),
+                new SystemChatMessage(
+                    $"Answer the user's question based on the provided content. Below is the memory about this user: \n{memory}"),
                 new UserChatMessage(input)
             ],
             cancellationToken: cancellationToken);
