@@ -3,11 +3,14 @@ using System.Text;
 using System.Text.Json;
 
 // 配置阿里云百炼平台参数
-const string apiKey = "***"; // 替换为您的API密钥
-const string baseUrl = "https://dashscope.aliyuncs.com/compatible-mode/v1";
-const string model = "qwen3-vl-plus"; // 或其他模型如 qwen-turbo, qwen-max
+const string apiKey = "**"; // 替换为您的API密钥
+const string baseUrl = "https://open.bigmodel.cn/api/paas/v4";
+const string model = "glm-4.5"; // 或其他模型如 qwen-turbo, qwen-max
 
-using var httpClient = new HttpClient();
+using var httpClient = new HttpClient()
+{
+    Timeout = TimeSpan.FromSeconds(600)
+};
 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
 httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 

@@ -4,14 +4,16 @@ using System.Text.Json.Serialization;
 
 // 配置
 
-var apiKey = "你的API密钥";
-var baseUrl = "https://dashscope.aliyuncs.com/compatible-mode/v1/";
-var model = "qwen3-max";
+var apiKey =
+    "";
+var baseUrl = "http://127.0.0.1:11434/v1/";
+var model = "llama3";
 
 // 创建 HttpClient
 using var httpClient = new HttpClient
 {
-    BaseAddress = new Uri(baseUrl)
+    BaseAddress = new Uri(baseUrl),
+    Timeout = TimeSpan.FromHours(1)
 };
 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
 
