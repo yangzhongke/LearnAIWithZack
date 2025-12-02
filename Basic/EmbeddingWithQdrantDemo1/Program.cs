@@ -1,6 +1,5 @@
 ﻿using System.ClientModel;
 using OpenAI;
-using OpenAI.Embeddings;
 using Qdrant.Client;
 using Qdrant.Client.Grpc;
 
