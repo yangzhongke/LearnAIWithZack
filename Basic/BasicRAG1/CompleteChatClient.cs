@@ -1,62 +1,53 @@
 using System.ClientModel;
 using System.Runtime.CompilerServices;
-using System.Text;
+using Microsoft.Extensions.AI;
 using OpenAI;
-using OpenAI.Chat;
 
 namespace AI_2;
 
 public class CompleteChatClient(string endpoint, string deploymentName, string apiKey = null)
 {
-    public async Task<string> GenerateTextAsync(string input, string context,
-        CancellationToken cancellationToken = default)
+    private IChatClient CreateClient()
     {
-        ChatClient client = new(
-            credential: new ApiKeyCredential(apiKey),
+        return new OpenAI.Chat.ChatClient(
             model: deploymentName,
+            credential: new ApiKeyCredential(apiKey),
             options: new OpenAIClientOptions
             {
                 Endpoint = new Uri($"{endpoint}")
-            });
+            }).AsIChatClient();
+    }
 
-        ChatCompletion completion = await client.CompleteChatAsync(
-        [
-            new SystemChatMessage($"根据提供的内容使用简体中文回答用户的问题。注意：不要在提供的内容之外进行回答。内容如下：\n{context}。"),
-            new UserChatMessage(input)
-        ], cancellationToken: cancellationToken);
+    public async Task<string> GenerateTextAsync(string input, string context,
+        CancellationToken cancellationToken = default)
+    {
+        using var client = CreateClient();
 
-        var sb = new StringBuilder();
-        foreach (var contentPart in completion.Content)
+        var messages = new List<ChatMessage>
         {
-            var message = contentPart.Text;
-            sb.AppendLine(message);
-        }
+            new ChatMessage(ChatRole.System, $"根据提供的内容使用简体中文回答用户的问题。注意：不要在提供的内容之外进行回答。内容如下：\n{context}。"),
+            new ChatMessage(ChatRole.User, input)
+        };
 
-        return sb.ToString();
+        var response = await client.GetResponseAsync(messages, cancellationToken: cancellationToken);
+
+        return response.Text ?? string.Empty;
     }
 
     public async IAsyncEnumerable<string> GenerateStreamingTextAsync(string input, string context,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        ChatClient client = new(
-            credential: new ApiKeyCredential(apiKey),
-            model: deploymentName,
-            options: new OpenAIClientOptions
-            {
-                Endpoint = new Uri($"{endpoint}")
-            });
+        using var client = CreateClient();
 
-        var asyncCollectionResult = client.CompleteChatStreamingAsync(
-            [
-                new SystemChatMessage($"根据提供的内容使用简体中文回答用户的问题。注意：不要在提供的内容之外进行回答。内容如下：\n{context}。"),
-                new UserChatMessage(input)
-            ],
-            cancellationToken: cancellationToken);
-
-        await foreach (var update in asyncCollectionResult)
-        foreach (var contentPart in update.ContentUpdate)
+        var messages = new List<ChatMessage>
         {
-            yield return contentPart.Text ?? string.Empty;
+            new ChatMessage(ChatRole.System, $"根据提供的内容使用简体中文回答用户的问题。注意：不要在提供的内容之外进行回答。内容如下：\n{context}。"),
+            new ChatMessage(ChatRole.User, input)
+        };
+
+        await foreach (var update in client.GetStreamingResponseAsync(messages, cancellationToken: cancellationToken))
+        {
+            yield return update.Text ?? string.Empty;
         }
     }
 }
