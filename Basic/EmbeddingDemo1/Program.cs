@@ -1,11 +1,13 @@
 using System.ClientModel;
 using OpenAI;
+using OpenAI.Embeddings;
 
 Console.WriteLine("=== Embedding Similarity Demo ===\n");
 
 var apiKey = Environment.GetEnvironmentVariable("AI__EmbeddingApiKey");
-var endpoint = "https://personalopenai1.openai.azure.com/openai/v1/";
-var deploymentName = "text-embedding-3-large";
+var endpoint =
+    "https://personalopenai1.openai.azure.com/openai/v1/"; // "https://dashscope.aliyuncs.com/compatible-mode/v1/"
+var deploymentName = "text-embedding-3-large"; //"text-embedding-v4"
 
 if (string.IsNullOrEmpty(apiKey))
 {
@@ -42,8 +44,8 @@ var textEmbeddings = new List<(string text, float[] embedding)>();
 
 foreach (var text in sampleTexts)
 {
-    var embeddingResult = await embeddingClient.GenerateEmbeddingAsync(text);
-    var embedding = embeddingResult.Value.ToFloats().ToArray();
+    ClientResult<OpenAIEmbedding> embeddingResult = await embeddingClient.GenerateEmbeddingAsync(text);
+    float[] embedding = embeddingResult.Value.ToFloats().ToArray();
     textEmbeddings.Add((text, embedding));
     Console.WriteLine($"✓ {text}");
 }
