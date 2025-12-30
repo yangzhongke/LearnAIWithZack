@@ -72,7 +72,8 @@ while (true)
     // Generate embedding for query
     var queryEmbeddingResult = await embeddingClient.GenerateEmbeddingAsync(query);
     var queryEmbedding = queryEmbeddingResult.Value.ToFloats().ToArray();
-
+    Console.WriteLine(queryEmbedding.Length);
+    Console.WriteLine(string.Join(',', queryEmbedding));
     // Calculate similarities
     var similarities = new List<(string text, double similarity)>();
 

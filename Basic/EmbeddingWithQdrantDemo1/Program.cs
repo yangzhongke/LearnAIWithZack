@@ -185,7 +185,8 @@ async Task InsertRecords()
             Vectors = embedding,
             Payload =
             {
-                ["text"] = text
+                ["text"] = text,
+                ["userId"] = "user_12345"
             }
         };
 

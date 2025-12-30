@@ -5,7 +5,7 @@ using HttpMataki.NET.Auto;
 using OpenAI;
 using OpenAI.Chat;
 
-HttpClientAutoInterceptor.StartInterception();
+//HttpClientAutoInterceptor.StartInterception();
 
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 

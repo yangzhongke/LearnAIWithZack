@@ -13,24 +13,12 @@ var files = Directory.GetFiles("E:\\主同步盘\\我的坚果云\\读书笔记�
 var embeddingApiKey = Environment.GetEnvironmentVariable("AI__EmbeddingApiKey");
 var chatApiKey = Environment.GetEnvironmentVariable("AI__ChatApiKey");
 
-
 //Azure OpenAI
-
 var embeddingEndpoint = "https://personalopenai1.openai.azure.com/openai/v1/";
 var embeddingDeploymentName = "text-embedding-3-large";
 var textGenEndpoint = "https://yangz-mf8s64eg-eastus2.cognitiveservices.azure.com/openai/v1/";
 var extGenDeploymentName = "gpt-5-nano";
 
-/*
-//Ollama 兼容OpenAI API
-var embeddingEndpoint = "http://127.0.0.1:11434/v1/";
-var embeddingDeploymentName = "mxbai-embed-large:latest";
-var textGenEndpoint = "http://127.0.0.1:11434/v1/";
-var extGenDeploymentName = "llama3:latest";
-*/
-
-using var httpClientOllama = new HttpClient
-    { Timeout = TimeSpan.FromMinutes(50), BaseAddress = new Uri("http://127.0.0.1:11434") };
 using var httpClientQdrant = new HttpClient
     { Timeout = TimeSpan.FromMinutes(50), BaseAddress = new Uri("http://localhost:6333") };
 var qdrantClient = new QdrantClient(httpClientQdrant);
@@ -46,7 +34,9 @@ if (choice == "1")
     var documents = new List<(string, float[])>();
     foreach (var file in files)
     {
+        //创新点1：对不同格式文件（pdf、word、图片等）支持，Pdf-MinerU，图片（可以让大模型总结图片内容）
         var text = await FileHelpers.ReadAllTextAnyEncodingAsync(file);
+        //创新点2：不同的文本切分方式
         var chunks = text.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         foreach (var chunk in chunks)
         {
@@ -65,13 +55,13 @@ if (choice == "1")
                 substring = chunk;
             }
 
-            // 2. 使用Ollama做embedding
+            // 2. 使用大模型做embedding
             var embedding = await embeddingClient.GetEmbeddingAsync(substring);
             documents.Add((substring, embedding));
         }
     }
 
-    await qdrantClient.DeleteCollectionAsync(collectionName);
+    //await qdrantClient.DeleteCollectionAsync(collectionName);
     // 3. 保存到Qdrant
     await qdrantClient.SaveToQdrantAsync(collectionName, documents);
     Console.WriteLine("已保存到Qdrant。");

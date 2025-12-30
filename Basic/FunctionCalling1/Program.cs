@@ -6,7 +6,7 @@ using HttpMataki.NET.Auto;
 using OpenAI;
 using OpenAI.Chat;
 
-HttpClientAutoInterceptor.StartInterception();
+//HttpClientAutoInterceptor.StartInterception();
 
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
@@ -15,7 +15,7 @@ var chatApiKey = Environment.GetEnvironmentVariable("OpenAI__ChatApiKey");
 var completeChatClient = new CompleteChatClient("https://yangz-mf8s64eg-eastus2.cognitiveservices.azure.com/openai/v1/",
     "gpt-5-nano", chatApiKey);
 
-var response = await completeChatClient.GenerateWithFunctionCallingAsync("How the weather in Beijing?");
+var response = await completeChatClient.GenerateWithFunctionCallingAsync("北京今天的天气适合于穿什么衣服?");
 Console.WriteLine(response);
 
 public class CompleteChatClient(string endpoint, string deploymentName, string apiKey = null)
