@@ -7,9 +7,8 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Azure.Core" Version="1.47.3"/>
         <PackageReference Include="HttpMataki.NET.Auto" Version="1.0.3"/>
-        <PackageReference Include="OpenAI" Version="2.4.0"/>
-        <PackageReference Include="Ude.NetStandard" Version="1.2.0"/>
+        <PackageReference Include="Microsoft.Extensions.AI" Version="10.0.1-preview.1.25571.5"/>
+        <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.0.1-preview.1.25571.5"/>
     </ItemGroup>
 </Project>
