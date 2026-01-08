@@ -1,9 +1,8 @@
-﻿using System.ClientModel;
+﻿using System.ComponentModel;
 using System.Text;
-using System.Text.Json;
-using HttpMataki.NET.Auto;
+using Microsoft.Extensions.AI;
+using System.ClientModel;
 using OpenAI;
-using OpenAI.Chat;
 
 //HttpClientAutoInterceptor.StartInterception();
 
@@ -16,222 +15,52 @@ var completeChatClient = new CompleteChatClient("https://yangz-mf8s64eg-eastus2.
 
 var response =
     await completeChatClient.GenerateWithFunctionCallingAsync(
-        "Find all executable files in my computer"); //"Find all my password files under E:\\主同步盘\\我的坚果云\\个人资料\\网络帐号");
+        "Find all my password files under E:\\主同步盘\\我的坚果云\\个人资料\\网络帐号");
 Console.WriteLine(response);
 
 
-public class CompleteChatClient(string endpoint, string deploymentName, string apiKey = null)
+public class CompleteChatClient(string endpoint, string deploymentName, string? apiKey = null)
 {
     public async Task<string> GenerateWithFunctionCallingAsync(string input,
         CancellationToken cancellationToken = default)
     {
-        ChatClient client = new(
-            credential: new ApiKeyCredential(apiKey),
-            model: deploymentName,
-            options: new OpenAIClientOptions
-            {
-                Endpoint = new Uri($"{endpoint}")
-            });
+        // Use OpenAI ChatClient and convert to IChatClient
+        var chatClient = new OpenAI.Chat.ChatClient(deploymentName, new ApiKeyCredential(apiKey ?? ""),
+            new OpenAIClientOptions() { Endpoint = new Uri(endpoint) }).AsIChatClient();
 
-        // Define the SearchFiles function
-        var searchFilesFunction = ChatTool.CreateFunctionTool(
-            "SearchFiles",
-            "Search all given file types under a directory and return matched files' full paths",
-            BinaryData.FromString("""
-                                  {
-                                      "type": "object",
-                                      "properties": {
-                                          "directory": {
-                                              "type": "string",
-                                              "description": "Directory path to search in"
-                                          },
-                                          "extensions": {
-                                              "type": "array",
-                                              "items": {
-                                                  "type": "string"
-                                              },
-                                              "description": "Array of file extensions to search for (e.g., ['.txt', '.cs', '.json'])"
-                                          }
-                                      },
-                                      "required": ["directory", "extensions"]
-                                  }
-                                  """));
-
-        // Define the ReadTextFile function
-        var readTextFileFunction = ChatTool.CreateFunctionTool(
-            "ReadTextFile",
-            "Read the text content of a given file",
-            BinaryData.FromString("""
-                                  {
-                                      "type": "object",
-                                      "properties": {
-                                          "fullPath": {
-                                              "type": "string",
-                                              "description": "Full path to the file to read"
-                                          }
-                                      },
-                                      "required": ["fullPath"]
-                                  }
-                                  """));
-
-        // Define the WriteToTextFile function
-        var writeToTextFileFunction = ChatTool.CreateFunctionTool(
-            "WriteToTextFile",
-            "Write given content to a text file at the specified path",
-            BinaryData.FromString("""
-                                  {
-                                      "type": "object",
-                                      "properties": {
-                                          "fullPath": {
-                                              "type": "string",
-                                              "description": "Full path where to write the file"
-                                          },
-                                          "content": {
-                                              "type": "string",
-                                              "description": "Content to write to the file"
-                                          }
-                                      },
-                                      "required": ["fullPath", "content"]
-                                  }
-                                  """));
-
-        // Define the GetAllDrives function
-        var getAllDrivesFunction = ChatTool.CreateFunctionTool(
-            "GetAllDrives",
-            "Get all available drives on the computer with their properties",
-            BinaryData.FromString("""
-                                  {
-                                      "type": "object",
-                                      "properties": {},
-                                      "required": []
-                                  }
-                                  """));
-
-        var messages = new List<ChatMessage>
-        {
-            new SystemChatMessage(
+        List<ChatMessage> messages =
+        [
+            new ChatMessage(ChatRole.System,
                 "You are a helpful assistant that can help users with file operations. You can search for files, read their contents, and write to files. Use these tools to help users manage their files effectively."),
-            new UserChatMessage(input)
+            new ChatMessage(ChatRole.User, input)
+        ];
+
+        var options = new ChatOptions
+        {
+            Tools =
+            [
+                AIFunctionFactory.Create(SearchFiles),
+                AIFunctionFactory.Create(ReadTextFile),
+                AIFunctionFactory.Create(WriteToTextFile),
+                AIFunctionFactory.Create(GetAllDrives)
+            ]
         };
 
-        var options = new ChatCompletionOptions
-        {
-            Tools = { searchFilesFunction, readTextFileFunction, writeToTextFileFunction, getAllDrivesFunction }
-        };
+        // Use ChatClientBuilder with UseFunctionInvocation for automatic function calling
+        var client = new ChatClientBuilder(chatClient)
+            .UseFunctionInvocation()
+            .Build();
 
-        // Chain function calls in a loop
-        while (true)
-        {
-            var response = await client.CompleteChatAsync(messages, options, cancellationToken);
-
-            if (response.Value.FinishReason == ChatFinishReason.ToolCalls)
-            {
-                // Add the assistant's response with tool calls
-                messages.Add(new AssistantChatMessage(response.Value));
-
-                // Process all tool calls in the response
-                foreach (var toolCall in response.Value.ToolCalls)
-                {
-                    var functionResult = toolCall.FunctionName switch
-                    {
-                        "SearchFiles" => HandleSearchFilesFunction(toolCall),
-                        "ReadTextFile" => HandleReadTextFileFunction(toolCall),
-                        "WriteToTextFile" => HandleWriteToTextFileFunction(toolCall),
-                        "GetAllDrives" => HandleGetAllDrivesFunction(toolCall),
-                        _ => "Function not found"
-                    };
-
-                    messages.Add(new ToolChatMessage(toolCall.Id, functionResult));
-                }
-
-                // Continue the loop to get the next response
-            }
-            else
-            {
-                // No more function calls needed, return final response
-                return response.Value.Content[0].Text;
-            }
-        }
+        var response = await client.GetResponseAsync(messages, options, cancellationToken);
+        return response.Text;
     }
 
-    private string HandleSearchFilesFunction(ChatToolCall toolCall)
-    {
-        try
-        {
-            var functionArgs = JsonDocument.Parse(toolCall.FunctionArguments);
-            var directory = functionArgs.RootElement.GetProperty("directory").GetString();
-            var extensionsArray = functionArgs.RootElement.GetProperty("extensions").EnumerateArray()
-                .Select(x => x.GetString()).ToArray();
-
-            var result = SearchFiles(directory, extensionsArray);
-
-            return JsonSerializer.Serialize(new { success = true, files = result },
-                new JsonSerializerOptions { WriteIndented = true });
-        }
-        catch (Exception ex)
-        {
-            return JsonSerializer.Serialize(new { success = false, error = ex.Message },
-                new JsonSerializerOptions { WriteIndented = true });
-        }
-    }
-
-    private string HandleReadTextFileFunction(ChatToolCall toolCall)
-    {
-        try
-        {
-            var functionArgs = JsonDocument.Parse(toolCall.FunctionArguments);
-            var fullPath = functionArgs.RootElement.GetProperty("fullPath").GetString();
-
-            var content = ReadTextFile(fullPath);
-
-            return JsonSerializer.Serialize(new { success = true, content },
-                new JsonSerializerOptions { WriteIndented = true });
-        }
-        catch (Exception ex)
-        {
-            return JsonSerializer.Serialize(new { success = false, error = ex.Message },
-                new JsonSerializerOptions { WriteIndented = true });
-        }
-    }
-
-    private string HandleWriteToTextFileFunction(ChatToolCall toolCall)
-    {
-        try
-        {
-            var functionArgs = JsonDocument.Parse(toolCall.FunctionArguments);
-            var fullPath = functionArgs.RootElement.GetProperty("fullPath").GetString();
-            var content = functionArgs.RootElement.GetProperty("content").GetString();
-
-            WriteToTextFile(fullPath, content);
-
-            return JsonSerializer.Serialize(new { success = true, message = $"Successfully wrote to {fullPath}" },
-                new JsonSerializerOptions { WriteIndented = true });
-        }
-        catch (Exception ex)
-        {
-            return JsonSerializer.Serialize(new { success = false, error = ex.Message },
-                new JsonSerializerOptions { WriteIndented = true });
-        }
-    }
-
-    private string HandleGetAllDrivesFunction(ChatToolCall toolCall)
-    {
-        try
-        {
-            var drives = GetAllDrives();
-
-            return JsonSerializer.Serialize(new { success = true, drives },
-                new JsonSerializerOptions { WriteIndented = true });
-        }
-        catch (Exception ex)
-        {
-            return JsonSerializer.Serialize(new { success = false, error = ex.Message },
-                new JsonSerializerOptions { WriteIndented = true });
-        }
-    }
-
-    // File operation implementations
-    private string[] SearchFiles(string directory, string[] extensions)
+    [Description("Search all given file types under a directory and return matched files' full paths")]
+    private string[] SearchFiles(
+        [Description("Directory path to search in")]
+        string directory,
+        [Description("Array of file extensions to search for (e.g., ['.txt', '.cs', '.json'])")]
+        string[] extensions)
     {
         if (!Directory.Exists(directory))
         {
@@ -250,7 +79,8 @@ public class CompleteChatClient(string endpoint, string deploymentName, string a
         return allFiles.Distinct().ToArray();
     }
 
-    private string ReadTextFile(string fullPath)
+    [Description("Read the text content of a given file")]
+    private string ReadTextFile([Description("Full path to the file to read")] string fullPath)
     {
         if (!File.Exists(fullPath))
         {
@@ -260,7 +90,12 @@ public class CompleteChatClient(string endpoint, string deploymentName, string a
         return File.ReadAllText(fullPath);
     }
 
-    private void WriteToTextFile(string fullPath, string content)
+    [Description("Write given content to a text file at the specified path")]
+    private void WriteToTextFile(
+        [Description("Full path where to write the file")]
+        string fullPath,
+        [Description("Content to write to the file")]
+        string content)
     {
         var directory = Path.GetDirectoryName(fullPath);
         if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
@@ -271,13 +106,18 @@ public class CompleteChatClient(string endpoint, string deploymentName, string a
         File.WriteAllText(fullPath, content);
     }
 
+    [Description("Get all available drives on the computer with their properties")]
     private object[] GetAllDrives()
     {
         var drives = DriveInfo.GetDrives()
             .Where(drive => drive.IsReady)
             .Select(drive => new
             {
-                drive.Name
+                drive.Name,
+                drive.DriveType,
+                TotalSize = drive.TotalSize,
+                AvailableSpace = drive.AvailableFreeSpace,
+                drive.VolumeLabel
             })
             .ToArray();
 
