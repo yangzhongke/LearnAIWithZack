@@ -4,9 +4,10 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using Microsoft.Extensions.AI;
 using System.ClientModel;
+using HttpMataki.NET.Auto;
 using OpenAI;
 
-//HttpClientAutoInterceptor.StartInterception();
+HttpClientAutoInterceptor.StartInterception();
 
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 

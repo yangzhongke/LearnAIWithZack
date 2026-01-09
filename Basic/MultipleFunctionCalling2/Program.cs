@@ -2,9 +2,10 @@
 using System.Text;
 using Microsoft.Extensions.AI;
 using System.ClientModel;
+using HttpMataki.NET.Auto;
 using OpenAI;
 
-//HttpClientAutoInterceptor.StartInterception();
+HttpClientAutoInterceptor.StartInterception();
 
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
@@ -15,7 +16,7 @@ var completeChatClient = new CompleteChatClient("https://yangz-mf8s64eg-eastus2.
 
 var response =
     await completeChatClient.GenerateWithFunctionCallingAsync(
-        "Find all my password files under E:\\主同步盘\\我的坚果云\\个人资料\\网络帐号");
+        "Find all my password files under E:\\主同步盘\\我的坚果云\\个人资料\\网络帐号, and write the result to E:\\temp\\password_files.txt");
 Console.WriteLine(response);
 
 
@@ -41,7 +42,7 @@ public class CompleteChatClient(string endpoint, string deploymentName, string? 
             [
                 AIFunctionFactory.Create(SearchFiles),
                 AIFunctionFactory.Create(ReadTextFile),
-                AIFunctionFactory.Create(WriteToTextFile),
+                AIFunctionFactory.Create(WriteToTextFileAsync),
                 AIFunctionFactory.Create(GetAllDrives)
             ]
         };
@@ -49,6 +50,7 @@ public class CompleteChatClient(string endpoint, string deploymentName, string? 
         // Use ChatClientBuilder with UseFunctionInvocation for automatic function calling
         var client = new ChatClientBuilder(chatClient)
             .UseFunctionInvocation()
+            //.UseToolReduction(new EmbeddingToolReductionStrategy())
             .Build();
 
         var response = await client.GetResponseAsync(messages, options, cancellationToken);
@@ -91,11 +93,11 @@ public class CompleteChatClient(string endpoint, string deploymentName, string? 
     }
 
     [Description("Write given content to a text file at the specified path")]
-    private void WriteToTextFile(
+    private async Task WriteToTextFileAsync(
         [Description("Full path where to write the file")]
         string fullPath,
         [Description("Content to write to the file")]
-        string content)
+        string content, CancellationToken cancellationToken)
     {
         var directory = Path.GetDirectoryName(fullPath);
         if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
@@ -103,7 +105,7 @@ public class CompleteChatClient(string endpoint, string deploymentName, string? 
             Directory.CreateDirectory(directory);
         }
 
-        File.WriteAllText(fullPath, content);
+        await File.WriteAllTextAsync(fullPath, content, cancellationToken);
     }
 
     [Description("Get all available drives on the computer with their properties")]
