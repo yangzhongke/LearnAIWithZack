@@ -25,7 +25,7 @@ public class CompleteChatClient(string endpoint, string deploymentName, string? 
         CancellationToken cancellationToken = default)
     {
         // Use OpenAI ChatClient directly for function calling
-        var chatClient = new OpenAI.Chat.ChatClient(deploymentName, new ApiKeyCredential(apiKey),
+        using var chatClient = new OpenAI.Chat.ChatClient(deploymentName, new ApiKeyCredential(apiKey),
             new OpenAIClientOptions() { Endpoint = new Uri(endpoint) }).AsIChatClient();
 
         List<ChatMessage> messages =
@@ -38,10 +38,10 @@ public class CompleteChatClient(string endpoint, string deploymentName, string? 
         {
             Tools = [AIFunctionFactory.Create(GetWeatherInfo)]
         };
-        var client = new ChatClientBuilder(chatClient)
+        using var functionCallingChatClient = new ChatClientBuilder(chatClient)
             .UseFunctionInvocation()
-            .Build();
-        var response = await client.GetResponseAsync(messages, options, cancellationToken);
+            .Build(); //对IChatClient进行包装，支持函数调用功能
+        var response = await functionCallingChatClient.GetResponseAsync(messages, options, cancellationToken);
         return response.Text;
     }
 
@@ -58,10 +58,6 @@ public class CompleteChatClient(string endpoint, string deploymentName, string? 
             windSpeed = "10 km/h"
         };
 
-        return JsonSerializer.Serialize(weatherData, new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-        });
+        return JsonSerializer.Serialize(weatherData);
     }
 }

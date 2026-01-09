@@ -26,7 +26,7 @@ public class CompleteChatClient(string endpoint, string deploymentName, string? 
         CancellationToken cancellationToken = default)
     {
         // Use OpenAI ChatClient and convert to IChatClient
-        var chatClient = new OpenAI.Chat.ChatClient(deploymentName, new ApiKeyCredential(apiKey ?? ""),
+        using var chatClient = new OpenAI.Chat.ChatClient(deploymentName, new ApiKeyCredential(apiKey ?? ""),
             new OpenAIClientOptions() { Endpoint = new Uri(endpoint) }).AsIChatClient();
 
         List<ChatMessage> messages =
@@ -48,7 +48,7 @@ public class CompleteChatClient(string endpoint, string deploymentName, string? 
         };
 
         // Use ChatClientBuilder with UseFunctionInvocation for automatic function calling
-        var client = new ChatClientBuilder(chatClient)
+        using var client = new ChatClientBuilder(chatClient)
             .UseFunctionInvocation()
             //.UseToolReduction(new EmbeddingToolReductionStrategy())
             .Build();
