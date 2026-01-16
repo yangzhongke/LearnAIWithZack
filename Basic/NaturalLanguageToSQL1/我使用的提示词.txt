@@ -1,0 +1,4 @@
+1. 我在使用postgresql数据库，生成如下sql语句：创建两张表：博客文章和评论。并且生成插入样例数据的sql语句
+2. 我要开发一个.NET 9编写的控制台程序，程序可以读取链接的数据库的表以及表结构以及表之间的外键关系，它可以根据用户输入的自然语言生成基于数据库表结构查询数据的SQL语句，并执行查询SQL，把结果输出到控制台。只支持postgresql数据库即可。先别开始生成代码，先告诉我你的工作计划。
+3. 可以，开始吧。
+4. 参考CallAiWithMicrosoft_Extensions_AI1，把Microsoft.Extensions.AI.Ollama这个包替换成Microsoft.Extensions.AI.OpenAI，把OllamaChatClient替换成OpenAI.Chat.ChatClient，和大模型交互的代码也参考CallAiWithMicrosoft_Extensions_AI1的用法
